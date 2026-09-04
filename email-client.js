@@ -16,6 +16,7 @@ const handoffToGoogleScript = (endpoint, payload) => fetch(endpoint, {
   headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
   body: new URLSearchParams({ payload: JSON.stringify(payload) }).toString()
 });
+const wait = milliseconds => new Promise(resolve => window.setTimeout(resolve, milliseconds));
 
 document.addEventListener('submit', async event => {
   if (event.target !== privateNoteForm) return;
@@ -31,7 +32,13 @@ document.addEventListener('submit', async event => {
     if (image) attachments.push(await encodeFile(image));
     if (typeof voiceBlob !== 'undefined' && voiceBlob) attachments.push(await encodeFile(new File([voiceBlob], 'voice-note.webm', { type:voiceBlob.type || 'audio/webm' })));
     if (attachments.some(file => Math.ceil(file.content.length * 0.75) > 4 * 1024 * 1024)) throw new Error('Each image or voice note must be under 4 MB.');
-    await handoffToGoogleScript(endpoint, { message:document.querySelector('#message-text').value, attachments, website:'' });
+    // Apps Script can keep a mobile browser waiting through its redirect chain
+    // even after MailApp has accepted the message. Do not leave the visitor in
+    // a permanent "Sending" state once the request has been handed off.
+    await Promise.race([
+      handoffToGoogleScript(endpoint, { message:document.querySelector('#message-text').value, attachments, website:'' }),
+      wait(4500)
+    ]);
     privateNoteForm.reset();
     if (typeof voiceBlob !== 'undefined') voiceBlob = null;
     document.querySelector('#file-status').textContent = '';
