@@ -3,3 +3,5 @@
 html{overflow-x:clip}body{max-width:100%;overflow-x:hidden}
 footer .footer-reflection{grid-column:2;max-width:430px;margin:0;font:500 clamp(27px,3vw,43px)/1.04 "Cormorant Garamond",serif;letter-spacing:-.04em;align-self:start}footer .footer-question,footer .footer-answer{display:block}footer .footer-answer{max-width:350px;margin-top:18px;font-size:.5em;line-height:1.28;letter-spacing:-.015em}@media(max-width:720px){footer .footer-reflection{margin:0 0 52px;font-size:32px}footer .footer-answer{margin-top:15px}}
 @media(min-width:721px){footer h2{white-space:nowrap}footer h2 br{display:inline}footer h2 br::after{content:" "}}
+
+#right-now{scroll-margin-top:100px}
