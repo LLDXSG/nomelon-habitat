@@ -22,6 +22,11 @@ document.addEventListener('submit', async event => {
   if (event.target !== privateNoteForm) return;
   event.preventDefault();
   event.stopImmediatePropagation();
+  if (!privateNoteForm.reportValidity()) return;
+  const replyEmail = document.querySelector('#reply-email').value.trim();
+  const message = document.querySelector('#message-text').value;
+  // Include the address in the body so the existing deployed relay supports replies.
+  const messageWithReplyEmail = replyEmail ? `${message}\n\nReply email: ${replyEmail}` : message;
   const endpoint = window.NOMELON_NOTE_ENDPOINT;
   const image = document.querySelector('#image-upload')?.files[0];
   if (!endpoint) { noteStatus.textContent = 'Private notes are being prepared. Please try again soon.'; return; }
@@ -36,7 +41,7 @@ document.addEventListener('submit', async event => {
     // even after MailApp has accepted the message. Do not leave the visitor in
     // a permanent "Sending" state once the request has been handed off.
     await Promise.race([
-      handoffToGoogleScript(endpoint, { message:document.querySelector('#message-text').value, attachments, website:'' }),
+      handoffToGoogleScript(endpoint, { message:messageWithReplyEmail, attachments, website:'' }),
       wait(4500)
     ]);
     privateNoteForm.reset();
